@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>ระบบคิดเงินถ่ายรูป (Custom รายบุคคล)</title>
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            margin: 20px;
+            padding: 10px;
+            max-width: 600px;
+            background: #f9f9f9;
+        }
+        label, input {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 5px;
+        }
+        .result {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 18px;
+            background: #fff;
+            padding: 15px;
+            border: 1px solid #ddd;
+        }
+        .custom-person {
+            margin-top: 10px;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #ccc;
+        }
+        .custom-options {
+            margin-left: 20px;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            width: 100%;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <h2>ระบบคิดเงินถ่ายรูป</h2>
+
+    <label>ชื่อลูกค้า:
+        <input type="text" id="customerName">
+    </label>
+
+    <label>จำนวนคน:
+        <input type="number" id="peopleCount" value="1" min="1">
+    </label>
+
+    <h3>รายการ Custom รายบุคคล:</h3>
+    <div id="customList"></div>
+    <button onclick="addCustom()">➕ เพิ่มรายการ Custom</button>
+
+    <button onclick="calculate()">คำนวณราคา</button>
+    <button onclick="downloadImage()">บันทึกเป็นภาพ</button>
+
+    <div class="result" id="result"></div>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script>
+        let customIndex = 0;
+
+        function addCustom() {
+            customIndex++;
+            const customDiv = document.createElement("div");
+            customDiv.className = "custom-person";
+            customDiv.innerHTML = `
+                <label>ชื่อคนที่ Custom:
+                    <input type="text" name="customName" placeholder="ชื่อคนที่ ${customIndex}">
+                </label>
+                <div class="custom-options">
+                    <label><input type="checkbox" class="hairColor"> เปลี่ยนสีผม (+100฿)</label>
+                    <label><input type="checkbox" class="hairStyle"> เปลี่ยนทรงผม (+100฿)</label>
+                </div>
+            `;
+            document.getElementById("customList").appendChild(customDiv);
+        }
+
+        function calculate() {
+            const basePrice = 350;
+            const name = document.getElementById("customerName").value || "ไม่ระบุ";
+            const people = parseInt(document.getElementById("peopleCount").value) || 1;
+
+            let customTotal = 0;
+            let customDetails = "";
+
+            const customBlocks = document.querySelectorAll(".custom-person");
+            customBlocks.forEach((block, index) => {
+                const cname = block.querySelector("input[name='customName']").value || `คนที่ ${index + 1}`;
+                const hairColor = block.querySelector(".hairColor").checked ? 100 : 0;
+                const hairStyle = block.querySelector(".hairStyle").checked ? 100 : 0;
+                const subtotal = hairColor + hairStyle;
+                customTotal += subtotal;
+
+                let desc = [];
+                if (hairColor) desc.push("เปลี่ยนสีผม");
+                if (hairStyle) desc.push("เปลี่ยนทรงผม");
+
+                customDetails += `${cname}: ${desc.join(", ")} (+${subtotal}฿)<br>`;
+            });
+
+            const baseTotal = basePrice * people;
+            const total = baseTotal + customTotal;
+
+            document.getElementById("result").innerHTML = `
+                ชื่อลูกค้า: ${name}<br>
+                จำนวนคน: ${people}<br>
+                ถ่ายภาพ: ${basePrice} × ${people} = ${baseTotal}฿<br><br>
+                <u>รายการ Custom:</u><br>
+                ${customDetails || "- ไม่มี -"}<br>
+                <strong>รวมทั้งหมด: ${total} บาท</strong>
+            `;
+        }
+
+        function downloadImage() {
+            html2canvas(document.querySelector("#result")).then(canvas => {
+                const link = document.createElement("a");
+                link.download = "ใบสรุปยอด.png";
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>
