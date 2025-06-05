@@ -1,137 +1,400 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ระบบคิดเงินถ่ายรูป (Custom รายบุคคล)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PromptPay QR Code Generator</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Sarabun', sans-serif;
-            margin: 20px;
-            padding: 10px;
-            max-width: 600px;
-            background: #f9f9f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
         }
-        label, input {
-            display: block;
+
+        /* Animated background elements */
+        body::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: float 20s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(-40px, -40px) rotate(360deg); }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.1),
+                0 8px 32px rgba(31, 38, 135, 0.37);
+            text-align: center;
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        .header {
+            margin-bottom: 35px;
+        }
+
+        h1 {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2.2em;
+            font-weight: 700;
             margin-bottom: 10px;
-            font-size: 16px;
         }
-        input[type="number"], input[type="text"] {
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+            font-weight: 400;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 12px;
+            color: #444;
+            font-weight: 600;
+            text-align: left;
+            font-size: 1.1em;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        input[type="number"] {
             width: 100%;
-            padding: 5px;
+            padding: 16px 50px 16px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1.1em;
+            background: #fafbfc;
+            transition: all 0.3s ease;
+            -moz-appearance: textfield;
         }
-        .result {
-            margin-top: 20px;
-            font-weight: bold;
-            font-size: 18px;
+
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
             background: #fff;
-            padding: 15px;
-            border: 1px solid #ddd;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
         }
-        .custom-person {
-            margin-top: 10px;
-            padding: 10px;
-            background: #fff;
-            border: 1px solid #ccc;
+
+        .currency-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            font-weight: 600;
+            font-size: 1.1em;
         }
-        .custom-options {
-            margin-left: 20px;
-        }
-        button {
-            margin-top: 10px;
-            padding: 10px;
-            width: 100%;
-            font-size: 16px;
-            background-color: #4CAF50;
+
+        .generate-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
+            padding: 16px 30px;
             border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .generate-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .generate-btn:hover::before {
+            left: 100%;
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        #qrCodeDisplay {
+            margin-top: 35px;
+            padding-top: 30px;
+            border-top: 2px solid #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 200px;
+            position: relative;
+        }
+
+        .qr-container {
+            position: relative;
+            display: none;
+            animation: fadeInScale 0.5s ease-out;
+        }
+
+        @keyframes fadeInScale {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        #qrCodeImage {
+            max-width: 250px;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.1),
+                0 1px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+            background: white;
+            padding: 20px;
+        }
+
+        #qrCodeImage:hover {
+            transform: scale(1.05);
+        }
+
+        .qr-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-radius: 10px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .amount-display {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .instruction {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            margin-top: 10px;
+            font-size: 0.95em;
+            display: none;
+            padding: 12px;
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(231, 76, 60, 0.2);
+        }
+
+        .loading {
+            display: none;
+            color: #667eea;
+            font-size: 1.1em;
+            margin-top: 20px;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 25px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            input[type="number"] {
+                padding: 14px 45px 14px 16px;
+                font-size: 1em;
+            }
+            
+            .generate-btn {
+                padding: 14px 25px;
+                font-size: 1.1em;
+            }
         }
     </style>
 </head>
 <body>
-    <h2>ระบบคิดเงินถ่ายรูป</h2>
+    <div class="container">
+        <div class="header">
+            <h1>PromptPay Generator</h1>
+            <p class="subtitle">สร้าง QR Code สำหรับรับเงิน</p>
+        </div>
 
-    <label>ชื่อลูกค้า:
-        <input type="text" id="customerName">
-    </label>
+        <div class="input-group">
+            <label for="amount">💰 จำนวนเงิน</label>
+            <div class="input-wrapper">
+                <input type="number" id="amount" placeholder="กรอกจำนวนเงิน" min="1" step="0.01">
+                <span class="currency-icon">฿</span>
+            </div>
+            <div class="error-message" id="amountError">
+                ❌ กรุณากรอกจำนวนเงินที่ถูกต้อง (มากกว่า 0)
+            </div>
+        </div>
 
-    <label>จำนวนคน:
-        <input type="number" id="peopleCount" value="1" min="1">
-    </label>
+        <button class="generate-btn" onclick="generateQrCode()">
+            🎯 สร้าง QR Code
+        </button>
 
-    <h3>รายการ Custom รายบุคคล:</h3>
-    <div id="customList"></div>
-    <button onclick="addCustom()">➕ เพิ่มรายการ Custom</button>
-
-    <button onclick="calculate()">คำนวณราคา</button>
-    <button onclick="downloadImage()">บันทึกเป็นภาพ</button>
-
-    <div class="result" id="result"></div>
-
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <script>
-        let customIndex = 0;
-
-        function addCustom() {
-            customIndex++;
-            const customDiv = document.createElement("div");
-            customDiv.className = "custom-person";
-            customDiv.innerHTML = `
-                <label>ชื่อคนที่ Custom:
-                    <input type="text" name="customName" placeholder="ชื่อคนที่ ${customIndex}">
-                </label>
-                <div class="custom-options">
-                    <label><input type="checkbox" class="hairColor"> เปลี่ยนสีผม (+100฿)</label>
-                    <label><input type="checkbox" class="hairStyle"> เปลี่ยนทรงผม (+100฿)</label>
+        <div id="qrCodeDisplay">
+            <div class="loading" id="loading">
+                กำลังสร้าง QR Code...
+            </div>
+            
+            <div class="qr-container" id="qrContainer">
+                <img id="qrCodeImage" alt="PromptPay QR Code">
+                <div class="qr-info">
+                    <div class="amount-display" id="displayAmount"></div>
+                    <div class="instruction">📱 สแกน QR Code เพื่อชำระเงิน</div>
                 </div>
-            `;
-            document.getElementById("customList").appendChild(customDiv);
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const promptPayId = "0649401302"; // Replace with your PromptPay ID
+
+        function generateQrCode() {
+            const amountInput = document.getElementById('amount');
+            const qrCodeImage = document.getElementById('qrCodeImage');
+            const qrContainer = document.getElementById('qrContainer');
+            const amountError = document.getElementById('amountError');
+            const displayAmount = document.getElementById('displayAmount');
+            const loading = document.getElementById('loading');
+            const amount = parseFloat(amountInput.value);
+
+            // Hide previous results
+            qrContainer.style.display = 'none';
+            amountError.style.display = 'none';
+            loading.style.display = 'none';
+
+            // Basic validation
+            if (isNaN(amount) || amount <= 0) {
+                amountError.style.display = 'block';
+                return;
+            }
+
+            // Show loading
+            loading.style.display = 'block';
+
+            // Format amount for display
+            const formattedAmount = new Intl.NumberFormat('th-TH', {
+                style: 'currency',
+                currency: 'THB'
+            }).format(amount);
+
+            displayAmount.textContent = formattedAmount;
+
+            // Generate QR code URL
+            const imageUrl = `https://promptpay.io/${promptPayId}/${amount}.png`;
+            
+            // Create new image to handle loading
+            const newImage = new Image();
+            newImage.onload = function() {
+                loading.style.display = 'none';
+                qrCodeImage.src = imageUrl;
+                qrContainer.style.display = 'block';
+            };
+            newImage.onerror = function() {
+                loading.style.display = 'none';
+                amountError.textContent = '❌ ไม่สามารถสร้าง QR Code ได้ กรุณาลองใหม่';
+                amountError.style.display = 'block';
+            };
+            newImage.src = imageUrl;
         }
 
-        function calculate() {
-            const basePrice = 350;
-            const name = document.getElementById("customerName").value || "ไม่ระบุ";
-            const people = parseInt(document.getElementById("peopleCount").value) || 1;
+        // Add Enter key support
+        document.getElementById('amount').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generateQrCode();
+            }
+        });
 
-            let customTotal = 0;
-            let customDetails = "";
-
-            const customBlocks = document.querySelectorAll(".custom-person");
-            customBlocks.forEach((block, index) => {
-                const cname = block.querySelector("input[name='customName']").value || `คนที่ ${index + 1}`;
-                const hairColor = block.querySelector(".hairColor").checked ? 100 : 0;
-                const hairStyle = block.querySelector(".hairStyle").checked ? 100 : 0;
-                const subtotal = hairColor + hairStyle;
-                customTotal += subtotal;
-
-                let desc = [];
-                if (hairColor) desc.push("เปลี่ยนสีผม");
-                if (hairStyle) desc.push("เปลี่ยนทรงผม");
-
-                customDetails += `${cname}: ${desc.join(", ")} (+${subtotal}฿)<br>`;
-            });
-
-            const baseTotal = basePrice * people;
-            const total = baseTotal + customTotal;
-
-            document.getElementById("result").innerHTML = `
-                ชื่อลูกค้า: ${name}<br>
-                จำนวนคน: ${people}<br>
-                ถ่ายภาพ: ${basePrice} × ${people} = ${baseTotal}฿<br><br>
-                <u>รายการ Custom:</u><br>
-                ${customDetails || "- ไม่มี -"}<br>
-                <strong>รวมทั้งหมด: ${total} บาท</strong>
-            `;
-        }
-
-        function downloadImage() {
-            html2canvas(document.querySelector("#result")).then(canvas => {
-                const link = document.createElement("a");
-                link.download = "ใบสรุปยอด.png";
-                link.href = canvas.toDataURL();
-                link.click();
-            });
-        }
+        // Auto-focus on amount input
+        window.addEventListener('load', function() {
+            document.getElementById('amount').focus();
+        });
     </script>
 </body>
 </html>
