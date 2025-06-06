@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบคิดเงินถ่ายรูป (Custom รายบุคคล)</title>
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            margin: 0px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+            box-sizing: border-box;
+            
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            
+            max-width: 600px;
+            width: 100%  
+        }
+        
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+        
+        h3 {
+            color: #555;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        input[type="number"]:focus, input[type="text"]:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .result {
+            margin-top: 25px;
+            font-weight: bold;
+            font-size: 18px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: none;
+        }
+        
+        .custom-person {
+            margin-top: 15px;
+            padding: 20px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .custom-person:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .custom-options {
+            margin-left: 0;
+            margin-top: 15px;
+        }
+        
+        .custom-options label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .custom-options label:hover {
+            background-color: rgba(102, 126, 234, 0.1);
+        }
+        
+        .custom-options input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+        
+        button {
+            margin-top: 15px;
+            padding: 15px 20px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .add-button {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+        }
+        
+        .add-button:hover {
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+        }
+        
+        .download-button {
+            background: linear-gradient(135deg, #ff7b7b, #ff6b6b);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+        
+        .download-button:hover {
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+        }
+        
+        .remove-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #qrCodeDisplay {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        #qrCodeImage {
+            max-width: 200px;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: none;
+        }
+        
+        .qr-title {
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🎥 ระบบคิดเงินถ่ายรูป</h2>
+
+        <label>👤 ชื่อลูกค้า:
+            <input type="text" id="customerName" placeholder="กรุณาใส่ชื่อลูกค้า">
+        </label>
+
+        <label>👥 จำนวนคน:
+            <input type="number" id="peopleCount" value="1" min="1" max="50">
+        </label>
+
+        <h3>✨ รายการ Custom รายบุคคล:</h3>
+        <div id="customList"></div>
+        <button class="add-button" onclick="addCustom()">➕ เพิ่มรายการ Custom</button>
+
+        <button onclick="calculate()">💰 คำนวณราคา</button>
+        <button class="download-button" onclick="downloadImage()">📱 บันทึกเป็นภาพ</button>
+
+        <div class="result fade-in" id="result"></div>
+        
+        <div id="qrCodeDisplay">
+            <div class="qr-title" id="qrTitle" style="display: none;">💳 QR Code สำหรับชำระเงิน</div>
+            <img id="qrCodeImage" alt="PromptPay QR Code">
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        let customIndex = 0;
+
+        function addCustom() {
+            customIndex++;
+            const customDiv = document.createElement("div");
+            customDiv.className = "custom-person fade-in";
+            customDiv.innerHTML = `
+                <button class="remove-button" onclick="removeCustom(this)" title="ลบรายการนี้">×</button>
+                <label>👤 ชื่อคนที่ Custom:
+                    <input type="text" name="customName" placeholder="ชื่อคนที่ ${customIndex}">
+                </label>
+                <div class="custom-options">
+                    <label><input type="checkbox" class="hairColor"> 🎨 เปลี่ยนสีผม (+100฿)</label>
+                    <label><input type="checkbox" class="hairStyle"> ✂️ เปลี่ยนทรงผม (+100฿)</label>
+                    <label><input type="checkbox" class="skinTone"> 🌟 ปรับสีผิว (+80฿)</label>
+                    <label><input type="checkbox" class="eyeColor"> 👁️ เปลี่ยนสีตา (+60฿)</label>
+                    <label><input type="checkbox" class="accessories"> 💎 เพิ่มเครื่องประดับ (+120฿)</label>
+                </div>
+            `;
+            document.getElementById("customList").appendChild(customDiv);
+        }
+
+        function removeCustom(button) {
+            button.parentElement.remove();
+        }
+
+        function calculate() {
+            const basePrice = 350;
+            const name = document.getElementById("customerName").value || "ไม่ระบุ";
+            const people = parseInt(document.getElementById("peopleCount").value) || 1;
+
+            let customTotal = 0;
+            let customDetails = "";
+
+            const customBlocks = document.querySelectorAll(".custom-person");
+            customBlocks.forEach((block, index) => {
+                const cname = block.querySelector("input[name='customName']").value || `คนที่ ${index + 1}`;
+                const hairColor = block.querySelector(".hairColor").checked ? 100 : 0;
+                const hairStyle = block.querySelector(".hairStyle").checked ? 100 : 0;
+                const skinTone = block.querySelector(".skinTone").checked ? 80 : 0;
+                const eyeColor = block.querySelector(".eyeColor").checked ? 60 : 0;
+                const accessories = block.querySelector(".accessories").checked ? 120 : 0;
+                
+                const subtotal = hairColor + hairStyle + skinTone + eyeColor + accessories;
+                customTotal += subtotal;
+
+                let desc = [];
+                if (hairColor) desc.push("🎨 เปลี่ยนสีผม");
+                if (hairStyle) desc.push("✂️ เปลี่ยนทรงผม");
+                if (skinTone) desc.push("🌟 ปรับสีผิว");
+                if (eyeColor) desc.push("👁️ เปลี่ยนสีตา");
+                if (accessories) desc.push("💎 เพิ่มเครื่องประดับ");
+
+                if (subtotal > 0) {
+                    customDetails += `👤 ${cname}: ${desc.join(", ")} (+${subtotal}฿)<br>`;
+                }
+            });
+
+            const baseTotal = basePrice * people;
+            const total = baseTotal + customTotal;
+
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = `
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h3 style="margin: 0; color: white;">🧾 ใบสรุปยอดการถ่ายรูป</h3>
+                </div>
+                👤 <strong>ชื่อลูกค้า:</strong> ${name}<br>
+                👥 <strong>จำนวนคน:</strong> ${people} คน<br>
+                📸 <strong>ถ่ายภาพ:</strong> ${basePrice} × ${people} = ${baseTotal}฿<br><br>
+                <div style="border-top: 2px solid rgba(255,255,255,0.3); padding-top: 15px;">
+                    <strong>✨ รายการ Custom:</strong><br>
+                    ${customDetails || "- ไม่มีรายการ Custom -"}<br>
+                </div>
+                <div style="border-top: 2px solid rgba(255,255,255,0.5); padding-top: 15px; margin-top: 15px; text-align: center;">
+                    <span style="font-size: 22px;">💰 <strong>รวมทั้งหมด: ${total.toLocaleString()} บาท</strong></span>
+                </div>
+            `;
+            
+            resultDiv.style.display = 'block';
+            
+            // Generate QR Code
+            if (total > 0) {
+                const promptPayId = "0649401302"; // Replace with your actual PromptPay ID
+                const imageUrl = `https://promptpay.io/${promptPayId}/${total}.png`;
+                const qrCodeImage = document.getElementById('qrCodeImage');
+                const qrTitle = document.getElementById('qrTitle');
+                
+                qrCodeImage.src = imageUrl;
+                qrCodeImage.style.display = 'block';
+                qrTitle.style.display = 'block';
+                
+                qrCodeImage.onerror = function() {
+                    console.log('QR Code generation failed');
+                    qrCodeImage.style.display = 'none';
+                    qrTitle.style.display = 'none';
+                };
+            }
+        }
+
+        function downloadImage() {
+            const resultElement = document.getElementById("result");
+            if (resultElement.style.display === 'none' || !resultElement.innerHTML.trim()) {
+                alert('กรุณาคำนวณราคาก่อนบันทึกภาพ');
+                return;
+            }
+            
+            // Create a temporary container for the image
+            const tempContainer = document.createElement('div');
+            tempContainer.style.position = 'absolute';
+            tempContainer.style.left = '-9999px';
+            tempContainer.style.background = 'white';
+            tempContainer.style.padding = '20px';
+            tempContainer.style.fontFamily = 'Sarabun, sans-serif';
+            tempContainer.innerHTML = resultElement.innerHTML;
+            document.body.appendChild(tempContainer);
+            
+            html2canvas(tempContainer, {
+                backgroundColor: '#ffffff',
+                scale: 2,
+                logging: false
+            }).then(canvas => {
+                const link = document.createElement("a");
+                const customerName = document.getElementById("customerName").value || "ลูกค้า";
+                const date = new Date().toLocaleDateString('th-TH');
+                link.download = `ใบสรุปยอด_${customerName}_${date}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                // Clean up
+                document.body.removeChild(tempContainer);
+            }).catch(error => {
+                console.error('Error generating image:', error);
+                alert('เกิดข้อผิดพลาดในการสร้างภาพ');
+                document.body.removeChild(tempContainer);
+            });
+        }
+
+        // Initialize with one custom person
+        window.addEventListener('load', function() {
+            addCustom();
+        });
+    </script>
+</body>
+</html>
